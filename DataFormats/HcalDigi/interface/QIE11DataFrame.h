@@ -19,7 +19,7 @@ public:
   static const int MASK_FLAVOR = 0x7;
   static const int FLAVOR_HB = 3;
   static const int MASK_LINKERROR = 0x800;
-  
+
   constexpr QIE11DataFrame() { }
   constexpr QIE11DataFrame(edm::DataFrame const & df) : m_data(df) { }
 
@@ -43,7 +43,7 @@ public:
     constexpr bool soi() const { return frame_[i_]&MASK_SOI; }
     constexpr int capid() const { return (flavor()==FLAVOR_HB)? ((frame_[i_]>>OFFSET_CAPID_HB)&MASK_CAPID) :
 	((((frame_[0]>>OFFSET_CAPID_HE)&MASK_CAPID)+i_-HEADER_WORDS)&MASK_CAPID); }
-    constexpr bool linkError() const { return (flavor()==FLAVOR_HB)? (frame_[i_]&MASK_LE_HB) : (frame_[0]&MASK_LINKERROR);  } 
+    constexpr bool linkError() const { return (flavor()==FLAVOR_HB)? (frame_[i_]&MASK_LE_HB) : (frame_[0]&MASK_LINKERROR);  }
   private:
     const edm::DataFrame& frame_;
     edm::DataFrame::size_type i_;
@@ -78,10 +78,10 @@ public:
   /// get the flavor of the frame
   constexpr int flavor() const { return ((m_data[0]>>OFFSET_FLAVOR)&MASK_FLAVOR); }
   /// was there a link error?
-  constexpr bool linkError() const { return m_data[0]&MASK_LINKERROR; } 
+  constexpr bool linkError() const { return m_data[0]&MASK_LINKERROR; }
   /// was there a capid rotation error?
   static const int MASK_CAPIDERROR = 0x400;
-  constexpr bool capidError() const { return m_data[0]&MASK_CAPIDERROR; } 
+  constexpr bool capidError() const { return m_data[0]&MASK_CAPIDERROR; }
   /// was this a mark-and-pass ZS event?
   constexpr bool zsMarkAndPass() const {return (flavor()==1); }
   /// set ZS params
@@ -90,6 +90,14 @@ public:
   }
   /// get the sample
   constexpr inline Sample operator[](edm::DataFrame::size_type i) const { return Sample(m_data,i+HEADER_WORDS); }
+
+  // set flavor
+
+  constexpr void setFlavor(int flavor) {
+    m_data[0]&=0x9FFF; // inversion of flavor mask
+    m_data[0]|=((flavor&MASK_FLAVOR)<<OFFSET_FLAVOR);
+  }
+
   constexpr void setCapid0(int cap0) {
     if (flavor()==FLAVOR_HB) {
       for (int i=0; i<samples(); i++) {
@@ -102,7 +110,7 @@ public:
     }
   }
   /// set the sample contents
-  constexpr void setSample(edm::DataFrame::size_type isample, int adc, 
+  constexpr void setSample(edm::DataFrame::size_type isample, int adc,
                            int tdc, bool soi=false) {
     if (isample>=size()) return;
     if (flavor()==FLAVOR_HB) m_data[isample+1]=(adc&Sample::MASK_ADC)|(soi?(Sample::MASK_SOI):(0))|((tdc&Sample::MASK_TDC_HB)<<Sample::OFFSET_TDC)|(m_data[isample+1]&Sample::MASK_CAPID_KEEP_HB);
