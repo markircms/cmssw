@@ -631,14 +631,9 @@ public:
     bool soi_;
 
 //  flavor for HB digies is hardcoded here
-
     static const int hbflavor = 3;
-    bool tdcoverflow = false;
-
     int is=0;
-
     // puting flavor is safe here because flavor is stored in the same bits for all flavors
-
     qiehb.setFlavor(hbflavor);
     capid_ = qiehe[0].capid();
     qiehb.setCapid0(capid_);
@@ -652,8 +647,7 @@ public:
         if (tdc_>=31&&tdc_<=61) qiehb.setSample(is,adc_,1,soi_);
         if (tdc_==62) qiehb.setSample(is,adc_,2,soi_);
         if (tdc_==63) qiehb.setSample(is,adc_,3,soi_);
-     }
-     is++;
+        is++;
     };
 // check if tdc is 2 bit, if not return he type data
     return qiehb;
