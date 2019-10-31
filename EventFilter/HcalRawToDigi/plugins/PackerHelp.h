@@ -640,32 +640,23 @@ public:
     // puting flavor is safe here because flavor is stored in the same bits for all flavors
 
     qiehb.setFlavor(hbflavor);
-
     capid_ = qiehe[0].capid();
-
     qiehb.setCapid0(capid_);
-
 //  iterator over samples
-
     for (edm::DataFrame::const_iterator it = qiehe.begin(); it != qiehe.end(); ++it) {
-
-      if (it == qiehe.begin()) continue;
-
-      adc_ = qiehe[is].adc();
-      tdc_ = qiehe[is].tdc();
-      soi_ = qiehe[is].soi();
-
-      if (tdc_>3){
-          std::cout << "Error: Only 2 bits for HB tdcs can be used" << std::endl;
-          tdcoverflow = true;
-      };
-
-      qiehb.setSample(is,adc_,tdc_,soi_);
-      is++;
+        if (it == qiehe.begin()) continue;
+        adc_ = qiehe[is].adc();
+        tdc_ = qiehe[is].tdc();
+        soi_ = qiehe[is].soi();
+        if (tdc_>=0&&tdc_<=31)  qiehb.setSample(is,adc_,0,soi_);
+        if (tdc_>=31&&tdc_<=61) qiehb.setSample(is,adc_,1,soi_);
+        if (tdc_==62) qiehb.setSample(is,adc_,2,soi_);
+        if (tdc_==63) qiehb.setSample(is,adc_,3,soi_);
+     }
+     is++;
     };
-
 // check if tdc is 2 bit, if not return he type data
-    if (tdcoverflow !=true) return qiehe; else return qiehb;
+    return qiehb;
   }
 
 #endif
